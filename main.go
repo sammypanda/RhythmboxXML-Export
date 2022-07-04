@@ -64,12 +64,21 @@ func main() {
 	for _, list := range playlist.Playlists {
 		fmt.Println(list.Name) // output the playlist name
 		if len(list.Locations) != 0 {
+
+			// Simple playlists:
+
+			f, _ := os.Create(playlistPath + "/" + list.Name + ".m3u")
+
 			for _, location := range list.Locations {
-				// Simple playlists:
+
 				manipulatedPath := strings.Replace(manipulate.ReplaceAllString(location.Path, ""), "%20", " ", -1) // remove "file://" and replace "%20" with " "
 
-				fmt.Println(manipulatedPath) // temporary output of the path to put to the new file
+				fmt.Println(manipulatedPath) // output path visually TODO: tie to verbose option?
+
+				f.WriteString(manipulatedPath + "\n") // put to the new file
 			}
+
+			defer f.Close()
 		} else {
 			fmt.Println("empty (no tasks) OR auto-playlist (unsupported)")
 
