@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/user"
 	"regexp"
@@ -36,9 +38,20 @@ func main() {
 		panic(err)
 	}
 
-	path := "/home/" + user.Username + "/.local/share/rhythmbox/playlists.xml" // default rhythmbox path TODO: put in a config file
-	rbPlaylists, _ := os.ReadFile(path)                                        // get go to read the file
-	playlist := &RhythmdbPlaylists{}                                           // assign the pattern from the structs to playlist var
+	rbPath := "/home/" + user.Username + "/.local/share/rhythmbox"       // default rhythmbox path, TODO: put in a config file
+	playlistPath := "/home/" + user.Username + "/Documents/rb-playlists" // default playlist path, TODO: put in a config file
+
+	// Create directory if doesn't exist
+
+	if _, err := os.Stat(playlistPath); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(playlistPath, os.ModePerm) // make the directory if it doesn't exist
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	rbPlaylists, _ := os.ReadFile(rbPath + "/playlists.xml") // get go to read the file
+	playlist := &RhythmdbPlaylists{}                         // assign the pattern from the structs to playlist var
 
 	manipulate, err := regexp.Compile(`file\:\/\/`) // used for manipulatedPath (removes "file://")
 
@@ -50,11 +63,17 @@ func main() {
 
 	for _, list := range playlist.Playlists {
 		fmt.Println(list.Name) // output the playlist name
-		for _, location := range list.Locations {
-			// Simple playlists:
-			manipulatedPath := strings.Replace(manipulate.ReplaceAllString(location.Path, ""), "%20", " ", -1) // remove "file://" and replace "%20" with " "
+		if len(list.Locations) != 0 {
+			for _, location := range list.Locations {
+				// Simple playlists:
+				manipulatedPath := strings.Replace(manipulate.ReplaceAllString(location.Path, ""), "%20", " ", -1) // remove "file://" and replace "%20" with " "
 
-			fmt.Println(manipulatedPath) // temporary output of the path to put to the new file
+				fmt.Println(manipulatedPath) // temporary output of the path to put to the new file
+			}
+		} else {
+			fmt.Println("empty (no tasks) OR auto-playlist (unsupported)")
+
+			// TODO: if list has <conjunction/> tag then it's auto-playlist, otherwise it's empty
 		}
 		fmt.Println("\n ") // put space between playlists
 	}
