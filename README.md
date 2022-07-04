@@ -3,6 +3,9 @@
 #### (Work In Progress)
 > Aim: automated export of auto-generated/user-generated playlists
 
+- [x] Simple (user-generated) Playlists
+- [ ] Abstracted (auto-generated) Playlists
+
 ---
 
 ## Steps to run (linux only):
