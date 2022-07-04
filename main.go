@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/xml"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -31,8 +32,28 @@ type RhythmdbPlaylists struct {
 
 // End of the structs for playlist.xml
 
+const usage = `Usage of RhythmboxXML-Export
+
+	-to --trackonly only the track instead of the full path to song file
+
+	-h --help prints help information
+
+`
+
+var isTrackOnly bool
+
+func init() {
+	// handling cli options/args
+	flag.BoolVar(&isTrackOnly, "trackonly", false, "")
+	flag.BoolVar(&isTrackOnly, "to", false, "")
+}
+
 func main() {
-	user, err := user.Current() // get user details
+	flag.Usage = func() { fmt.Print(usage) } // import for substituting in a better help page
+	flag.Parse()                             // handle the flags
+	user, err := user.Current()              // get user details
+
+	fmt.Printf("test %t", isTrackOnly)
 
 	if err != nil {
 		panic(err)
@@ -72,6 +93,11 @@ func main() {
 			for _, location := range list.Locations {
 
 				manipulatedPath := strings.Replace(manipulate.ReplaceAllString(location.Path, ""), "%20", " ", -1) // remove "file://" and replace "%20" with " "
+
+				if isTrackOnly {
+					dropPath, _ := regexp.Compile(`[^_]*\/`)
+					manipulatedPath = dropPath.ReplaceAllString(manipulatedPath, "")
+				}
 
 				fmt.Println(manipulatedPath) // output path visually TODO: tie to verbose option?
 
