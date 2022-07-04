@@ -12,3 +12,4 @@
 - create one or more playlists
 - clone the repository and cd into it
 - run ``go run main.go``
+- check /home/[your-user]/Documents/rb-playlists
