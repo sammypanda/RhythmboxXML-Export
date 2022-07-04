@@ -53,8 +53,6 @@ func main() {
 	flag.Parse()                             // handle the flags
 	user, err := user.Current()              // get user details
 
-	fmt.Printf("test %t", isTrackOnly)
-
 	if err != nil {
 		panic(err)
 	}
